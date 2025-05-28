@@ -1,103 +1,104 @@
 # Robotic Arm + Chassis System  
-**Senior Design Project • Drexel University • 2025**  
-_Gill Saligman — [jsaligman@gmail.com](mailto:jsaligman@gmail.com) • [LinkedIn](https://www.linkedin.com/in/gill-saligman-3a81a7255)_
+Senior Design Project – Drexel University – 2025  
+Gill Saligman — jsaligman@gmail.com • www.linkedin.com/in/gill-saligman-3a81a7255
 
-This project is a modular robotic manipulator mounted to a motorized chassis, designed for planetary surface operations and prototyped for NASA's RASC-AL competition. I developed the full system architecture — mechanical, electrical, and software — to demonstrate autonomy, communication, and precision motor control across distributed subsystems.
-
----
-
-## 🔧 Overview
-
-- **Platform**: Custom 4-wheeled rover chassis  
-- **Arm**: 7-DOF modular robotic arm with PID control  
-- **Brain**: Raspberry Pi 4 (onboard) hosting Wi-Fi and MQTT broker  
-- **Communication**: MQTT over local Wi-Fi — robust, scalable, and fast  
-- **Control Modes**:  
-  - **Position mode**: PID loop to target angle using potentiometer feedback  
-  - **Velocity mode**: Direct motor control with acceleration handling  
-- **Control Interfaces**: SSH and Xbox controller via MQTT
-
-Each arm joint is modular — receiving only **four wires** (HV, LV) — and contains its own motor controller, ESP8266 microcontroller, and potentiometer.
+This project is a modular robotic arm mounted to a custom motorized chassis, designed for autonomous surface exploration. It was built for the NASA RASC-AL competition and represents a full-stack engineering effort — I developed everything from the mechanical structure to the embedded firmware to the wireless communication system.
 
 ---
 
-## 🛠 Mechanical Design
+## Overview
 
-- Structural frame: 1"x1" aluminum extrusion  
-- All joints, brackets, and harmonic drives: **3D printed** and custom-designed  
-- Arm optimized for modularity, weight, and reach/mobility  
-- Joint torque calculated based on load case simulations and lifting specs  
-- Gear reductions designed to meet torque and inertia requirements  
+- 4-wheeled custom chassis with differential drive  
+- 7-DOF robotic arm with closed-loop PID control  
+- Onboard Raspberry Pi 4 running a Wi-Fi hotspot and MQTT broker  
+- Real-time wireless control using Xbox controller or SSH  
+- Supports both position mode (PID to angle) and velocity mode (motor speed)
+
+Each joint of the arm is self-contained — powered and controlled by just four wires (high-voltage, low-voltage). Inside each module is a motor, driver, potentiometer, and microcontroller, making the system scalable and modular.
 
 ---
 
-## ⚡ Electrical Architecture
+## Mechanical Design
 
-- **Power**:  
-  - 24V input from wall supply  
-  - 5V buck regulator powers Raspberry Pi and logic lines  
-- **Joint Boards** (Custom PCBs):  
-  - ESP8266 (D1 Mini) microcontroller  
+- Frame built from 1" x 1" aluminum extrusion  
+- All joints and brackets are custom 3D-printed  
+- Uses custom harmonic drives and gear reductions for torque and control  
+- Designed for high modularity and minimal weight  
+- Arm was simulated and tested for realistic lifting force and torque demands
+
+---
+
+## Electrical Architecture
+
+- Power:  
+  - 24V input for motors  
+  - 5V buck converters for Pi and microcontrollers  
+- Custom joint PCBs:  
+  - ESP8266 (D1 Mini)  
   - DRV8871 motor driver  
-  - Potentiometer for joint angle feedback  
-  - PWM/MQTT-compatible firmware  
-- **Minimal wiring**: Only 24V and 5V lines between joints
+  - Potentiometer for angle feedback  
+- Wiring between joints is minimal: shared power and logic lines only
 
 ---
 
-## 💻 Software & Communication
+## Software & Communication
 
-- **MQTT Broker**: Hosted on Raspberry Pi (Mosquitto)  
-- **Desired Values** sent in bracket format:  
-  ```[DL, DR, J3, J4, J5, J6, G]```  
-  - `DL/DR` = Drive train left/right velocity  
-  - `J3–J6` = `P45.0` (position) or `V-0.6` (velocity)  
-  - `G` = Gripper angle (0–180)
+- MQTT broker (Mosquitto) runs on the Pi and handles all messaging  
+- Joint commands are sent in this format:  
+  [DL, DR, J3, J4, J5, J6, G]  
+  - DL/DR: left/right chassis motor speeds (velocity mode)  
+  - J3–J6: joint control as either Pxx.xx or Vxx.xx  
+  - G: gripper angle (0–180 degrees)
 
-- **ESP8266 Joint Firmware**:  
-  - Parses desired angle from bracket  
-  - Switches mode (P/V) dynamically  
-  - Runs local PID loop or velocity output  
-  - Publishes actual angle back over MQTT
-
-- **Control Options**:
-  - SSH terminal (send manual commands)  
-  - Xbox controller (via MQTT with mode toggles, LED indicators, deadzones, and analog scaling)
+Each ESP8266 joint listens for its own command, figures out if it's a position or velocity instruction, and runs either a PID loop or a direct speed output. Every joint sends its current state back to the Pi for live feedback.
 
 ---
 
-## 📡 Live Feedback
+## Control Options
 
-Each joint continuously reports actual position in real time:
+- SSH terminal for sending manual commands  
+- Xbox controller support with mode toggles, deadzones, and analog control  
+- Commands are published via MQTT and received by joints in real time
 
-```plaintext
-🟢 DESIRED : ['0.00', '0.00', 'P30.00', 'V-0.50', 'X', 'X', '60']
+---
+
+## Live Feedback
+
+Each joint sends back its real-time position continuously:
+
+🟢 DESIRED : ['0.00', '0.00', 'P30.00', 'V-0.50', 'X', 'X', '60']  
 🔵 ACTUAL  : ['X', 'X', '29.80', '-86.12', 'X', 'X', '60']
-```
 
-## 🧠 Skills Used
+---
 
-### Mechanical Engineering
-- Torque calculation, load analysis, and harmonic drive design  
-- Structural optimization and modular arm design  
-- CAD modeling and 3D printing for rapid prototyping  
+## Skills Used
 
-### Electrical Engineering
-- Custom PCB layout and testing  
-- Power distribution (24V/5V), buck conversion, and wiring  
-- Analog signal handling for potentiometers and motor control  
+Mechanical Engineering  
+- Designed and simulated load-bearing robotic joints  
+- Built custom harmonic drive gearboxes  
+- Optimized structures for modularity, weight, and performance  
+- CAD modeling in Fusion360, full FDM 3D printing workflow  
 
-### Embedded Systems & Firmware
-- MicroPython development on ESP8266  
-- Closed-loop PID implementation for joint control  
-- Real-time sensor feedback and actuator output  
+Electrical Engineering  
+- Designed and wired low-voltage and high-voltage systems  
+- Built and tested custom PCBs for joints  
+- Integrated potentiometers for analog angle feedback  
 
-### Networking & Communication
-- MQTT protocol using Mosquitto broker on Raspberry Pi  
-- Distributed control architecture for modular joints  
-- Wi-Fi-based low-latency control with timeout safety  
+Embedded Systems  
+- Wrote MicroPython firmware for ESP8266 boards  
+- Tuned PID loops for accurate motion control  
+- Handled noisy analog data and real-time motor response  
 
-### Software Development
-- Python scripting and MQTT-based communication  
-- Xbox controller input parsing and velocity mapping  
-- Real-time command routing, deadzone handling, and telemetry logging
+Networking & Communication  
+- Set up Wi-Fi access point and MQTT broker on Raspberry Pi  
+- Designed distributed control architecture over MQTT  
+- Ensured robust communication with watchdogs and timeouts  
+
+Software  
+- Python scripting for input handling and wireless control  
+- Implemented Xbox controller logic and feedback  
+- Built a flexible command parser with mode switching, clamping, and failsafes
+
+---
+
+Let me know if you'd like a demo video or hardware walkthrough!
