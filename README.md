@@ -73,7 +73,7 @@ Each joint continuously reports actual position in real time:
 ```plaintext
 🟢 DESIRED : ['0.00', '0.00', 'P30.00', 'V-0.50', 'X', 'X', '60']
 🔵 ACTUAL  : ['X', 'X', '29.80', '-86.12', 'X', 'X', '60']
-'''
+```
 
 ## 🧠 Skills Used
 
